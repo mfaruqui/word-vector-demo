@@ -13,8 +13,12 @@
 <h2>Word Vector Evaluation</h2>
 </header>
 
-<div id="content" >
-
+  <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+  <script type="text/javascript">
+    var pairsFound = new Array();
+    var resultsFound = new Array();
+    var taskNum = new Array();
+  </script>
 <?php
   if(isset($_REQUEST["made_upload"])){
     
@@ -28,11 +32,18 @@
       //}
       //pclose($handle);
       
-      $command = 'python -W ignore sample-script.py '.$vectorfile.' 2>&1';
+      $command = 'python -W ignore sample-script.py '.$vectorfile;
       $temp = exec($command, $output);
       foreach ($output as &$value) {
-        list($notFound, $corr) = split(" ", $value);
-        print $notFound." ".$corr."<br/>";
+        list($taskNum, $notFound, $corr) = split(" ", $value);
+        ?>
+        <script type="text/javascript">
+          pairsFound.push('<?=$notFound?>');
+          resultsFound.push('<?=$corr?>');
+          taskNum.push('<?=$taskNum?>');
+        </script>
+        <?php
+        //print $taskNum." ".$notFound." ".$corr."<br/>";
       }
     } else {
       print "Could not upload file.";
@@ -40,7 +51,18 @@
     print "</td></tr></table>";
   }
 ?>
+<script type="text/javascript">
+for(var index in taskNum){
+  var taskId = taskNum[index];
+  taskId = taskId - 1;
+  var pairVal = pairsFound[taskId];
+  var resultVal = resultsFound[taskId];
+  $($(".result")[taskId]).html(resultVal);
+  $($(".pairs")[taskId]).html(pairVal);
+}
+</script>
 
+<div>
 <form enctype="multipart/form-data" action="" method="POST">
     <input type="hidden" name="MAX_FILE_SIZE" value="5000000000" />
     <h3>Upload Your Vectors (in .txt format):</h3> 
@@ -49,9 +71,9 @@
     <input type="submit" value="Upload" />
     <input type="hidden" name="made_upload" value="1" />
 </form>
+</div>
 
-<br>
-
+<div>
 <h3>Word Similarity Tasks<h3>
 
 <br>
@@ -67,68 +89,81 @@
   <td align="center">WS-353</td>
   <td align="center">353 </td>
   <td align="center"><a href="http://www.cs.technion.ac.il/~gabr/resources/data/wordsim353/"> Finkelstein et. al, 2002</a> </td>
-  <td align="center"> </td>
-  <td align="center"> </td> 
+  <td align="center" class="pairs"> </td>
+  <td align="center" class="result"> </td> 
 </tr>
 <tr>
   <td align="center">2</td>
   <td align="center">WS-353-SIM</td>
   <td align="center"> 203 </td>
   <td align="center"><a href="http://alfonseca.org/eng/research/wordsim353.html">Agirre et. al, 2009</a> </td>
-  <td align="center"> </td>
-  <td align="center"> </td> 
+  <td align="center" class="pairs"> </td>
+  <td align="center" class="result"> </td> 
 </tr>
 <tr>
   <td align="center">3</td>
   <td align="center">WS-353-REL</td>
   <td align="center">252 </td>
   <td align="center"><a href="http://alfonseca.org/eng/research/wordsim353.html">Agirre et. al, 2009</a> </td>
-  <td align="center"> </td>
-  <td align="center"> </td> 
+  <td align="center" class="pairs"> </td>
+  <td align="center" class="result"> </td> 
 </tr>
 <tr>
   <td align="center">4</td>
   <td align="center">MC-30</td>
   <td align="center">30 </td>
   <td align="center"> <a href="http://www.tandfonline.com/doi/abs/10.1080/01690969108406936#.Uu_392SwIyV"> Miller and Charles, 1930</a> </td>
-  <td align="center"> </td>
-  <td align="center"> </td> 
+  <td align="center" class="pairs"> </td>
+  <td align="center" class="result"> </td> 
 </tr>
 <tr>
   <td align="center">5</td>
   <td align="center">RG-65</td>
   <td align="center">65 </td>
   <td align="center"><a href="http://dl.acm.org/citation.cfm?id=365657">R and G, 1965</a> </td>
-  <td align="center"> </td>
-  <td align="center"> </td> 
+  <td align="center" class="pairs"> </td>
+  <td align="center" class="result"> </td> 
 </tr>
 <tr>
   <td align="center">6</td>
   <td align="center">Rare-Word</td>
   <td align="center">2034 </td>
   <td align="center"><a href="http://www-nlp.stanford.edu/~lmthang/morphoNLM/">Luong et. al, 2013</a> </td>
-  <td align="center"> </td>
-  <td align="center"> </td> 
+  <td align="center" class="pairs"> </td>
+  <td align="center" class="result"> </td> 
 </tr>
 <tr>
   <td align="center">7</td>
   <td align="center">MEN-TR</td>
   <td align="center">3000 </td>
   <td align="center"><a href="http://clic.cimec.unitn.it/~elia.bruni/MEN.html">Bruni et. al, 2012</a> </td>
-  <td align="center"> </td>
-  <td align="center"> </td> 
+  <td align="center" class="pairs"> </td>
+  <td align="center" class="result"> </td> 
 </tr>
 <tr>
   <td align="center">8</td>
   <td align="center">MTurk-287</td>
   <td align="center">287 </td>
   <td align="center"><a href="http://tx.technion.ac.il/~kirar/Datasets.html">Radinsky et. al, 2011</a> </td>
-  <td align="center"> </td>
-  <td align="center"> </td> 
+  <td align="center" class="pairs"> </td>
+  <td align="center" class="result"> </td> 
 </tr>
 </table>
 
-<br>
+<script type="text/javascript">
+for(var index in taskNum){
+ var taskId = taskNum[index];
+ taskId = taskId - 1;
+ var pairVal = pairsFound[taskId];
+ var resultVal = resultsFound[taskId];
+ $($(".result")[taskId]).html(resultVal);
+ $($(".pairs")[taskId]).html(pairVal);
+}
+</script>
+
+</div>
+
+<div>
 
 <h3>Word Plots<h3>
 

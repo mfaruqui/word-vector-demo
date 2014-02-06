@@ -66,7 +66,7 @@ def word_sim_tasks(wordVectors):
         notFound += 1
         totalSize += 1
     correlation = spearmans_rho(assign_ranks(manualDict), assign_ranks(autoDict)) 
-    print notFound, "%.4f" %correlation
+    print i+1, notFound, "%.4f" %correlation
       
 if __name__=='__main__':
 
