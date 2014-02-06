@@ -1,0 +1,90 @@
+@import url(http://fonts.googleapis.com/css?family=Lato:300,400);
+body {
+    background: rgb(134, 156, 158);/*#f3f3f3;*/
+    font: normal 100% Lato, sans-serif;
+    margin: 0;
+    color: #555;
+}
+
+body > * {
+    width: 790px;
+    padding: 20px;
+    margin: 20px auto;
+    background: white;
+}
+
+a {
+    color: #28D;
+    text-decoration: none;
+}
+
+h1 a {
+    color: inherit;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    font-weight: 300;
+}
+
+a strong {
+  color: inherit;
+  font-weight: 900;
+}
+
+strong {
+  font-weight: 900;
+  color: #151515;
+}
+
+em {
+  font-weight: 100;
+}
+
+ul {
+    list-style-type: square;
+    padding: 0 1em;
+}
+
+code, pre, tt {
+    font: 12pt Consolas, Monaco, monospace;
+    background: #f3f3f3;
+    padding: 0.2em;
+}
+
+pre {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 0.5em;
+}
+
+pre code {
+    padding: 0;
+    font-size: 90%;
+}
+
+header {
+    position: relative;
+}
+
+header nav {
+    font-size: 120%;
+    position: absolute;
+    right: 0;
+    top: 20px;
+}
+
+header nav ul {
+    padding: 0;
+    margin: 0;
+}
+
+header nav li {
+    display: inline-block;
+    margin: 0 0.5em;
+    vertical-align: middle;
+}
+
+header a {
+    color: inherit;
+}
