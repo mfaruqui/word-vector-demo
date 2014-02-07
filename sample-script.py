@@ -7,15 +7,16 @@ from numpy.linalg import norm
 
 from tsne import plot_words
 
-def read_word_vectors(fileObj):
+def read_word_vectors(fileObj, reqdVocab):
   
   wordVectors = {}
   for lineNum, line in enumerate(fileObj):
     line = line.strip().lower()
     word = line.split()[0]
-    wordVectors[word] = numpy.zeros(len(line.split())-1, dtype=float)
-    for index, vecVal in enumerate(line.split()[1:]):
-      wordVectors[word][index] = float(vecVal)
+    if word in reqdVocab:
+      wordVectors[word] = numpy.zeros(len(line.split())-1, dtype=float)
+      for index, vecVal in enumerate(line.split()[1:]):
+        wordVectors[word][index] = float(vecVal)
       
   ''' normalize weight vector '''
   wordVectors[word] /= math.sqrt((wordVectors[word]**2).sum() + 1e-6)
@@ -52,7 +53,7 @@ def word_sim_tasks(wordVectors):
   FILES = ['data/EN-WS-353-ALL.txt', 'data/EN-WS-353-SIM.txt', \
            'data/EN-WS-353-REL.txt','data/EN-MC-30.txt', 'data/EN-RG-65.txt',\
            'data/EN-RW-STANFORD.txt', 'data/EN-MEN-TR-3k.txt', \
-           'data/EN-MTurk-287.txt']
+           'data/EN-MTurk-287.txt', 'data/EN-MTurk-771.txt', 'data/EN-YP-130.txt']
   for i, FILE in enumerate(FILES):
     manualDict, autoDict = ({}, {})
     notFound, totalSize = (0, 0)
@@ -64,22 +65,38 @@ def word_sim_tasks(wordVectors):
         autoDict[(word1, word2)] = cosine_sim(wordVectors[word1], wordVectors[word2])
       else:
         notFound += 1
-        totalSize += 1
+      totalSize += 1
     correlation = spearmans_rho(assign_ranks(manualDict), assign_ranks(autoDict)) 
-    print i+1, notFound, "%.4f" %correlation
+    print i+1, totalSize-notFound, "%.4f" %correlation
       
 if __name__=='__main__':
 
+  VOCAB_FILE = 'fullVocab.txt'
+  reqdVocab = {}
+  for line in open(VOCAB_FILE, 'r'):
+    reqdVocab[line.strip()] = 0
+  
   fileName = sys.argv[1]
   if fileName.endswith('.txt'): fileObj = open(fileName, 'r')
   elif fileName.endswith('.gz'): fileObj = gzip.open(fileName, 'r')
-  wordVectors = read_word_vectors(fileObj)
+  wordVectors = read_word_vectors(fileObj, reqdVocab)
   
   word_sim_tasks(wordVectors)
   
   ''' Set 1 words: Synonyms and antonyms of 'beautiful' '''
   set1p = ["beautiful", "pretty", "splendid", "elegant", "marvelous", "magnificent", "charming", "cute", "gorgeous"]
-  set1n = ["ugly", "awful", "foul", "hideous", "grotesque", "beastly", "horrid"]
+  set1p += ["lovely", "pleasing", "wonderful", "handsome", "excellent", "fair"]
+  set1n = ["ugly", "awful", "foul", "hideous", "grotesque", "beastly", "horrid", "poor", "horrible", "crude"]
+  set1n += ["dull", "ordinary", "repulsive", "disgusting", "unattractive"]
   plot_words(wordVectors, set1p, set1n, 'set1.png')
   
+  set1p = ["russia", "china", "france", "germany", "spain", "pakistan", "canada", "italy", "japan", "thailand", "iran"]
+  set1n = ["moscow", "beijing", "paris", "berlin", "madrid", "islamabad", "ottawa", "rome", "tokyo", "bangkok", "tehran"]
+  plot_words(wordVectors, set1p, set1n, 'set2.png')
+  
+  set1p = ["prince", "son", "uncle", "boy", "brother", "dad", "father", "grandfather", "grandson", "groom"]
+  set1p += ["he", "his", "husband", "king", "man", "nephew"]
+  set1n = ["princess", "daughter", "aunt", "girl", "sister", "mom", "mother", "grandmother", "grandaughter", "bride"]
+  set1n += ["she", "her", "wife", "queen", "woman", "niece"]
+  plot_words(wordVectors, set1p, set1n, 'set3.png')
   

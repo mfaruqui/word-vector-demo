@@ -197,7 +197,8 @@ def plot_words(wordVectors, set1p, set1n, imgFile):
         textcoords = None, bbox = None, arrowprops = None, size=10
       )
 
-  Plot.savefig(imgFile, bbox_inches=0)
+  Plot.savefig(imgFile, bbox_inches='tight')
+  Plot.close()
   
 if __name__ == "__main__":
   
@@ -216,4 +217,4 @@ if __name__ == "__main__":
             arrowprops = None,
       size=10)
 
-  Plot.savefig(sys.argv[3], bbox_inches=0);
+  Plot.savefig(sys.argv[3], bbox_inches='tight');
