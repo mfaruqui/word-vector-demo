@@ -5,33 +5,26 @@
     <title>WordVec Demo</title>
     <link rel="stylesheet" href="style/style.css">
     <link rel="stylesheet" href="style/pygments.css">
-
+ 
 </head>
-
+ 
 <body>
 <header>
 <h2>Word Vector Evaluation</h2>
 </header>
-
-  <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-  <script type="text/javascript">
+ 
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script type="text/javascript">
+  var userWordsInput = '';
     var pairsFound = new Array();
     var resultsFound = new Array();
     var taskNum = new Array();
-  </script>
+</script>
 <?php
-  if(isset($_REQUEST["made_upload"])){
-    
+  if(isset($_REQUEST["upload"])){
+    $userwords = "";
     if (move_uploaded_file($_FILES['userfile']['tmp_name'], 'user-vecs/'.$_FILES['userfile']['name'])) {
       $vectorfile = 'user-vecs/'.$_FILES['userfile']['name'];
-      
-      //error_reporting(E_ALL);
-      //$handle = popen('python sample-script.py '.$vectorfile.' 2>&1', 'r');
-      //while (($buffer = fgets($handle, 4096)) !== false) {
-      //    echo $buffer."<br>";
-      //}
-      //pclose($handle);
-      
       $command = 'python -W ignore sample-script.py '.$vectorfile;
       $temp = exec($command, $output);
       foreach ($output as &$value) {
@@ -43,7 +36,6 @@
           taskNum.push('<?=$taskNum?>');
         </script>
         <?php
-        //print $taskNum." ".$notFound." ".$corr."<br/>";
       }
     } else {
       print "Could not upload file.";
@@ -61,7 +53,7 @@ for(var index in taskNum){
   $($(".pairs")[taskId]).html(pairVal);
 }
 </script>
-
+ 
 <div>
 <form enctype="multipart/form-data" action="" method="POST">
     <input type="hidden" name="MAX_FILE_SIZE" value="5000000000" />
@@ -69,14 +61,83 @@ for(var index in taskNum){
     <br>
     <input name="userfile" type="file" />
     <input type="submit" value="Upload" />
-    <input type="hidden" name="made_upload" value="1" />
+    <input type="hidden" name="upload" value="1" />
     (in .txt/.txt.gz format)
 </form>
 </div>
+ 
+<div>
+  <h3>Choose Pre-trained Vectors</h3>
+  <br>
+  <form action="" method="POST">
+  <input type="radio" name="vector" value="cw">Blah (Collobert and Weston, 2008)</input><br>
+  <input type="radio" name="vector" value="mik-rnn">Skip-Gram (Mikolov et. al, 2013)</input><br>
+  <input type="radio" name="vector" value="mik-sg">RNN Embeddings (Mikolov et. al, 2011)</input><br>
+  <input type="radio" name="vector" value="socher">Blah (Socher et. al, 2012)</input><br>
+  <input type="radio" name="vector" value="faruqui">Multilingual (Faruqui and Dyer, 2014)</input><br>
+</div>
+<div>
+  <h3>Plot Your Words</h3>
+  <br>
+  <input id="textField" name="userwords" type="text" style="width: 700px;"></input>
+  <br><br> 
+  <?php
+    if(isset($_REQUEST["eval-trained"])){
+      if (strlen($userwords) != 0) {
+      echo '<img align="center" src="user.png">';
+      }
+    }
+  ?>
+</div>
+
+<div>
+  <input type="submit" name="eval-trained" value="Evaluate" />
+  </form>
+</div>
+ 
+<?php
+  if(isset($_REQUEST["eval-trained"])){
+    $vecname = $_POST["vector"]; 
+    $userwords = $_POST["userwords"];
+    $userwords = trim($userwords);
+    ?>
+    <script type="text/javascript">userWordsInput = "<?=$userwords?>"</script>
+    <?php 
+    if ($vecname == "cw") {   
+        $vectorfile = 'trained-vecs/cw.txt.gz'; 
+    }
+    else if ($vecname == "mik-sg"){
+        $vectorfile = 'trained-vecs/mik-sg.txt.gz';
+    } 
+    else if ($vecname == "mik-rnn"){
+        $vectorfile = 'trained-vecs/mik-rnn.txt.gz';
+    } 
+    else if ($vecname == "rnn"){
+        $vectorfile = 'trained-vecs/socher-rnn.txt.gz';
+    } 
+    else if ($vecname == "faruqui"){
+        $vectorfile = 'trained-vecs/faruqui.txt.gz';
+    }
+    ?>
+    <?php
+    $command = 'python -W ignore sample-script.py '.$vectorfile.' '.$userwords;
+    $temp = exec($command, $output);
+    foreach ($output as &$value) {
+      list($taskNum, $notFound, $corr) = split(" ", $value);
+      ?>
+      <script type="text/javascript">
+        pairsFound.push('<?=$notFound?>');
+        resultsFound.push('<?=$corr?>');
+        taskNum.push('<?=$taskNum?>');
+      </script>
+      <?php
+    }
+  } 
+?> 
 
 <div>
 <h3>Word Pair Similarity Ranking</h3>
-
+ 
 <br>
 <table border="1" cellpadding="8" align="center">
 <th>No.</th>
@@ -166,7 +227,7 @@ for(var index in taskNum){
   <td align="center" class="result"> </td> 
 </tr>
 </table>
-
+ 
 <script type="text/javascript">
 for(var index in taskNum){
  var taskId = taskNum[index];
@@ -177,42 +238,34 @@ for(var index in taskNum){
  $($(".pairs")[taskId]).html(pairVal);
 }
 </script>
-
+ 
 </div>
-
+ 
 <div>
-  
-<h3>Word Plots</h3>
+   
+<h3>Default Word Plots</h3>
 <a href="http://homepage.tudelft.nl/19j49/t-SNE.html">t-SNE tool, Maaten and Hinton 2008</a>
 <br><br>
-Antonym and Synonyms
-
+Antonym and Synonyms<br>
 <?php
-  if(isset($_REQUEST["made_upload"])){
-    echo '<img src="set1.png" align="center">';
+  if(isset($_REQUEST["upload"]) || isset($_REQUEST["eval-trained"])){
+    echo '<img align="center" src="set1.png">';
   }
 ?>
-
 <br><br>
-
-Countries and Capitals
-
+Countries and Capitals<br>
 <?php
-  if(isset($_REQUEST["made_upload"])){
-    echo '<img src="set2.png" align="center">';
+  if(isset($_REQUEST["upload"]) || isset($_REQUEST["eval-trained"])){
+    echo '<img align="center" src="set2.png">';
   }
 ?>
-  
 <br><br>
-
-Male and Female
-
+Male and Female<br>
 <?php
-  if(isset($_REQUEST["made_upload"])){
-    echo '<img src="set3.png" align="center">';
+  if(isset($_REQUEST["upload"]) || isset($_REQUEST["eval-trained"])){
+    echo '<img align="center" src="set3.png">';
   }
 ?>
-  
 </div>
 </body>
 </html>
