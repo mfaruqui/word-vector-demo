@@ -20,104 +20,42 @@
     var resultsFound = new Array();
     var taskNum = new Array();
 </script>
- 
 <?php
-  if(isset($_REQUEST["eval-trained"])){
-    $vecname = $_POST["vector"]; 
-    $userwords = $_POST["userwords"];
-    $userwords = trim($userwords);
-    ?>
-    <script type="text/javascript">userWordsInput = "<?=$userwords?>"</script>
-    <?php 
-    if ($vecname == "turian") {   
-        $vectorfile = 'trained-vecs/turian.txt'; 
+  if(isset($_REQUEST["upload"])){
+    $userwords = "";
+    if (move_uploaded_file($_FILES['userfile']['tmp_name'], 'user-vecs/'.$_FILES['userfile']['name'])) {
+      $vectorfile = 'user-vecs/'.$_FILES['userfile']['name'];
+      $command = 'python -W ignore sample-script.py '.$vectorfile;
+      $temp = exec($command, $output);
+      foreach ($output as &$value) {
+        list($taskNum, $notFound, $corr) = split(" ", $value);
+        ?>
+        <script type="text/javascript">
+          pairsFound.push('<?=$notFound?>');
+          resultsFound.push('<?=$corr?>');
+          taskNum.push('<?=$taskNum?>');
+        </script>
+        <?php
+      }
+    } else {
+      print "Could not upload file.";
     }
-    else if ($vecname == "senaa") {   
-        $vectorfile = 'trained-vecs/senna.txt'; 
-    }
-    else if ($vecname == "mik-sg"){
-        $vectorfile = 'trained-vecs/mik-sg.txt';
-    } 
-    else if ($vecname == "mik-rnn"){
-        $vectorfile = 'trained-vecs/mik-rnn.txt';
-    } 
-    else if ($vecname == "socher"){
-        $vectorfile = 'trained-vecs/socher.txt';
-    } 
-    else if ($vecname == "faruqui"){
-        $vectorfile = 'trained-vecs/faruqui.txt';
-    }
-    ?>
-    <?php
-    $command = 'python -W ignore sample-script.py '.$vectorfile.' '.$userwords;
-    $temp = exec($command, $output);
-    foreach ($output as &$value) {
-      list($taskNum, $notFound, $corr) = split(" ", $value);
-      ?>
-      <script type="text/javascript">
-        pairsFound.push('<?=$notFound?>');
-        resultsFound.push('<?=$corr?>');
-        taskNum.push('<?=$taskNum?>');
-      </script>
-      <?php
-    }
-  } 
-?> 
+    print "</td></tr></table>";
+  }
+?>
  
 <div>
-  <h3>Choose Pre-trained Vectors</h3>
-  <br>
-  <form action="" method="POST">
-    <table border="1" cellpadding="8" align="center">
-      <th>Select?</th>
-      <th>Name</th>
-      <th>Dimensions</th>
-      <th>Vocabulary</th>
-      <th>Reference</th>
-      <tr>
-        <td align="center"><input type="radio" name="vector" value="turian"></input></td>
-        <td align="center">Metaoptimize</td>
-        <td align="center">50</td>
-        <td align="center">268810</td>
-        <td align="center"><a href="http://metaoptimize.com/projects/wordreprs/">Turian et al, 2010</a></td>
-      </tr>
-      <tr>
-        <td align="center"><input type="radio" name="vector" value="senna"></input></td>
-        <td align="center">Senna</td>
-        <td align="center">50</td>
-        <td align="center">130000</td>
-        <td align="center"><a href="http://ronan.collobert.com/senna/">Collobert et al, 2011</a></td>
-      </tr>
-      <tr>
-        <td align="center"><input type="radio" name="vector" value="mik-rnn"></input></td>
-        <td align="center">RNN</td>
-        <td align="center">80</td>
-        <td align="center">82390</td>
-        <td align="center"><a href="http://rnnlm.org/">Mikolov et al, 2011</a></td>
-      </tr>
-    <tr>
-        <td align="center"><input type="radio" name="vector" value="socher"></input></td>
-        <td align="center">Global Context</td>
-        <td align="center">50</td>
-        <td align="center">100232</td>
-        <td align="center"><a href="http://www.socher.org/index.php/Main/ImprovingWordRepresentationsViaGlobalContextAndMultipleWordPrototypes">Socher et al, 2012</a></td>
-      </tr>
-      <tr>
-        <td align="center"><input type="radio" name="vector" value="mik-sg"></input></td>
-        <td align="center">Skip-Gram</td>
-        <td align="center">512</td>
-        <td align="center">0</td>
-        <td align="center"><a href="http://arxiv.org/abs/1301.3781">Mikolov et al 2013</a></td>
-      </tr>
-      <tr>
-        <td align="center"><input type="radio" name="vector" value="faruqui"></input></td>
-        <td align="center">Multilingual</td>
-        <td align="center">512</td>
-        <td align="center">180834</td>
-        <td align="center"><a href="http://cs.cmu.edu/~mfaruqui">Faruqui and Dyer, 2014</a></td>
-      </tr>
-    </table>
+<form enctype="multipart/form-data" action="" method="POST">
+    <input type="hidden" name="MAX_FILE_SIZE" value="5000000000" />
+    <h3>Upload Your Vectors:</h3>
+    <br>
+    <input name="userfile" type="file" />
+    <input type="submit" value="Upload" />
+    <input type="hidden" name="upload" value="1" />
+    (in .txt/.txt.gz format)
+</form>
 </div>
+
 <div>
   <h3>Plot Your Words</h3>
   <br>
@@ -250,21 +188,21 @@ for(var index in taskNum){
 <br><br>
 Antonym and Synonyms<br>
 <?php
-  if(isset($_REQUEST["eval-trained"])){
+  if(isset($_REQUEST["upload"]) || isset($_REQUEST["eval-trained"])){
     echo '<img align="center" src="set1.png">';
   }
 ?>
 <br><br>
 Countries and Capitals<br>
 <?php
-  if(isset($_REQUEST["eval-trained"])){
+  if(isset($_REQUEST["upload"]) || isset($_REQUEST["eval-trained"])){
     echo '<img align="center" src="set2.png">';
   }
 ?>
 <br><br>
 Male and Female<br>
 <?php
-  if(isset($_REQUEST["eval-trained"])){
+  if(isset($_REQUEST["upload"]) || isset($_REQUEST["eval-trained"])){
     echo '<img align="center" src="set3.png">';
   }
 ?>
