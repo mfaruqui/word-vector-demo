@@ -46,8 +46,11 @@
     else if ($vecname1 == "mik-sg"){
       $vectorfile = 'trained-vecs/mik-sg.txt';
     } 
-    else if ($vecname1 == "mik-rnn"){
-      $vectorfile = 'trained-vecs/mik-rnn.txt';
+    else if ($vecname1 == "mik-rnn-80"){
+      $vectorfile = 'trained-vecs/mik-rnn-80.txt';
+    } 
+    else if ($vecname1 == "mik-rnn-640"){
+      $vectorfile = 'trained-vecs/mik-rnn-640.txt';
     } 
     else if ($vecname1 == "socher"){
       $vectorfile = 'trained-vecs/socher.txt';
@@ -175,7 +178,7 @@
       <tr>
         <td align="center"><input type="checkbox" name="checked[]" value="mik-sg" onClick="return chkChecks('checked[]')"></input></td>
         <td align="left">Skip-Gram</td>
-        <td align="center">640</td>
+        <td align="center">80</td>
         <td align="center">180834</td>
         <td align="left"><a href="http://arxiv.org/abs/1301.3781">Mikolov et al 2013</a></td>
       </tr>
