@@ -23,139 +23,80 @@
 </header>
  
 <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
 <script type="text/javascript">
   var userWordsInput = '';
     var pairsFound = new Array();
     var resultsFound = new Array();
     var taskNum = new Array();
 </script>
- 
 <?php
-  if(isset($_REQUEST["eval-trained"])){
-    $vecname = $_POST["vector"]; 
+  if(isset($_REQUEST["upload"])){
     $userwords = $_POST["userwords"];
     $userwords = trim($userwords);
-    ?>
-    <script type="text/javascript">userWordsInput = "<?=$userwords?>"</script>
-    <?php 
-    if ($vecname == "turian") {   
-      $vectorfile = 'trained-vecs/turian.txt'; 
+    if (move_uploaded_file($_FILES['userfile']['tmp_name'], 'user-vecs/'.$_FILES['userfile']['name'])) {
+      $vectorfile = 'user-vecs/'.$_FILES['userfile']['name'];
+      $command = 'python -W ignore sample-script.py '.$vectorfile.' '.$userwords;
+      $temp = exec($command, $output);
+      foreach ($output as &$value) {
+        list($taskNum, $notFound, $corr) = split(" ", $value);
+        ?>
+        <script type="text/javascript">
+          pairsFound.push('<?=$notFound?>');
+          resultsFound.push('<?=$corr?>');
+          taskNum.push('<?=$taskNum?>');
+        </script>
+        <?php
+      }
+    } else {
+      print "Could not upload file.";
     }
-    else if ($vecname == "senna") {   
-      $vectorfile = 'trained-vecs/senna.txt'; 
-    }
-    else if ($vecname == "mik-sg"){
-      $vectorfile = 'trained-vecs/mik-sg.txt';
-    } 
-    else if ($vecname == "mik-rnn-80"){
-      $vectorfile = 'trained-vecs/mik-rnn-80.txt';
-    } 
-    else if ($vecname == "mik-rnn-640"){
-      $vectorfile = 'trained-vecs/mik-rnn-640.txt';
-    }
-    else if ($vecname == "socher"){
-      $vectorfile = 'trained-vecs/socher.txt';
-    } 
-    else if ($vecname == "faruqui"){
-      $vectorfile = 'trained-vecs/faruqui.txt';
-    }
-    else {
-      die('None of vectors chosen');  
-    }
-    $command = 'python -W ignore sample-script.py '.$vectorfile.' '.$userwords;
-    $temp = exec($command, $output);
-    foreach ($output as &$value) {
-      list($taskNum, $notFound, $corr) = split(" ", $value);
-      ?>
-      <script type="text/javascript">
-        pairsFound.push('<?=$notFound?>');
-        resultsFound.push('<?=$corr?>');
-        taskNum.push('<?=$taskNum?>');
-      </script>
-      <?php
-    }
-  } 
-?> 
- 
-<div>
-  <h3>Step 1: Choose Pre-trained Vector</h3>
-  <br>
-  <form action="" method="POST">
-    <table border="1" cellpadding="8" align="center">
-      <th>Select?</th>
-      <th>Name</th>
-      <th>Dimensions</th>
-      <th>Vocabulary</th>
-      <th>Reference</th>
-      <tr>
-        <td align="center"><input type="radio" name="vector" value="turian"></input></td>
-        <td align="left">Metaoptimize</td>
-        <td align="center">50</td>
-        <td align="center">268810</td>
-        <td align="left"><a href="http://metaoptimize.com/projects/wordreprs/">Turian et al, 2010</a></td>
-      </tr>
-      <tr>
-        <td align="center"><input type="radio" name="vector" value="senna"></input></td>
-        <td align="left">Senna</td>
-        <td align="center">50</td>
-        <td align="center">130000</td>
-        <td align="left"><a href="http://ronan.collobert.com/senna/">Collobert et al, 2011</a></td>
-      </tr>
-      <tr>
-        <td align="center"><input type="radio" name="vector" value="mik-rnn-80"></input></td>
-        <td align="left">RNN</td>
-        <td align="center">80</td>
-        <td align="center">82390</td>
-        <td align="left"><a href="http://rnnlm.org/">Mikolov et al, 2011</a></td>
-      </tr>
-      <tr>
-        <td align="center"><input type="radio" name="vector" value="mik-rnn-640"></input></td>
-        <td align="left">RNN</td>
-        <td align="center">640</td>
-        <td align="center">82390</td>
-        <td align="left"><a href="http://rnnlm.org/">Mikolov et al, 2011</a></td>
-      </tr>
-    <tr>
-        <td align="center"><input type="radio" name="vector" value="socher"></input></td>
-        <td align="left">Global Context</td>
-        <td align="center">50</td>
-        <td align="center">100232</td>
-        <td align="left"><a href="http://www.socher.org/index.php/Main/ImprovingWordRepresentationsViaGlobalContextAndMultipleWordPrototypes">Socher et al, 2012</a></td>
-      </tr>
-      <tr>
-        <td align="center"><input type="radio" name="vector" value="mik-sg"></input></td>
-        <td align="left">Skip-Gram</td>
-        <td align="center">512</td>
-        <td align="center">180834</td>
-        <td align="left"><a href="http://arxiv.org/abs/1301.3781">Mikolov et al 2013</a></td>
-      </tr>
-      <tr>
-        <td align="center"><input type="radio" name="vector" value="faruqui"></input></td>
-        <td align="left">Multilingual</td>
-        <td align="center">512</td>
-        <td align="center">180834</td>
-        <td align="left"><a href="http://cs.cmu.edu/~mfaruqui">Faruqui and Dyer, 2014</a></td>
-      </tr>
-    </table>
-</div>
-<div>
-  <h3>Step 2: Plot Your Words</h3>
-  <br>
-  <input id="textField" name="userwords" type="text" style="width: 700px;"></input>
-  <br><br> 
-  <?php
-  if(isset($_REQUEST["eval-trained"])){
-    if (strlen($userwords) != 0) {
-      echo '<img align="center" src="user.png">';
-    }
+    print "</td></tr></table>";
   }
-  ?>
-</div>
+?>
 
 <div>
-  <input type="submit" name="eval-trained" style="margin-left:42%" value="Evaluate" />
-  </form>
+<form enctype="multipart/form-data" action="" method="POST">
+    <input type="hidden" name="MAX_FILE_SIZE" value="5000000000" />
+    <h3>Step 1: Filter Your Vectors</h3>
+    <br>
+    Your vectors should be in the following format:<br>
+    <pre class="prettyprint">
+    london 0.102 -4.31 -0.003 ...
+    paris -1.23 3.450 -0.03 ...
+    </pre>
+    Download the following <a href="fullVocab.txt">vocabulary</a> file and 
+    <a href="filterVocab.py">script</a> and run:<br>
+    <pre class="prettyprint">
+    python filterVocab.py fullVocab.txt &lt; yourVectors(.txt/.txt.gz) &gt; filtVectors.txt
+    </pre>
+    Now you can upload the filtered vectors!
 </div>
+ 
+<div>
+<form enctype="multipart/form-data" action="" method="POST">
+    <input type="hidden" name="MAX_FILE_SIZE" value="5000000000" />
+    <h3>Step 2: Upload Filtered Vectors:</h3>
+    <br>
+    <input name="userfile" type="file" />
+    <input type="hidden" name="upload" value="1" />
+    (in .txt/.txt.gz format)
+</div>
+<div>
+  <h3>Step 3: Plot Your Words</h3>
+  <input id="textField" name="userwords" type="text" style="width: 700px;"></input>
+  <?php
+    if(isset($_REQUEST["upload"])){
+      if (strlen($userwords) != 0) {
+        echo '<img align="center" src="user.png">';
+      }
+    }
+  ?>
+</div>
+<div>
+<input style="margin-left: 42%;" type="submit" value="Evaluate">
+</div>
+</form>
 
 <div>
 <h3>Word Pair Similarity Ranking</h3>
@@ -270,21 +211,21 @@ for(var index in taskNum){
 <br><br>
 Antonym and Synonyms<br>
 <?php
-  if(isset($_REQUEST["eval-trained"])){
+  if(isset($_REQUEST["upload"]) || isset($_REQUEST["eval-trained"])){
     echo '<img align="center" src="set1.png">';
   }
 ?>
 <br><br>
 <!--Countries and Capitals<br>
 <?php
-  if(isset($_REQUEST["eval-trained"])){
+  if(isset($_REQUEST["upload"]) || isset($_REQUEST["eval-trained"])){
     echo '<img align="center" src="set2.png">';
   }
 ?>
 <br><br>-->
 Male and Female<br>
 <?php
-  if(isset($_REQUEST["eval-trained"])){
+  if(isset($_REQUEST["upload"]) || isset($_REQUEST["eval-trained"])){
     echo '<img align="center" src="set3.png">';
   }
 ?>

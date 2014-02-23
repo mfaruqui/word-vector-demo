@@ -81,23 +81,41 @@ if __name__=='__main__':
   wordVectors = read_word_vectors(fileObj, reqdVocab)
   
   word_sim_tasks(wordVectors)
-  if userWords != []: 
+  userWords = [word for word in userWords if word in wordVectors]
+
+  if len(userWords) > 0: 
     plot_words(wordVectors, userWords, [], 'user.png')
+  else:
+    os.system('cp not-found.png user.png')
   
   ''' Set 1 words: Synonyms and antonyms of 'beautiful' '''
   set1p = ["beautiful", "pretty", "splendid", "elegant", "marvelous", "magnificent", "charming", "cute", "gorgeous"]
   set1p += ["lovely", "pleasing", "wonderful", "handsome", "excellent", "fair"]
   set1n = ["ugly", "awful", "foul", "hideous", "grotesque", "beastly", "horrid", "poor", "horrible", "crude"]
   set1n += ["dull", "ordinary", "repulsive", "disgusting", "unattractive"]
-  plot_words(wordVectors, set1p, set1n, 'set1.png')
+  set1p = [word for word in set1p if word in wordVectors]
+  set1n = [word for word in set1n if word in wordVectors]
+  if len(set1p+set1n) > 0:
+    plot_words(wordVectors, set1p, set1n, 'set1.png')
+  else:
+    os.system('cp not-found.png set1.png')
   
   set1p = ["russia", "china", "france", "germany", "spain", "pakistan", "canada", "italy", "japan", "thailand", "iran"]
   set1n = ["moscow", "beijing", "paris", "berlin", "madrid", "islamabad", "ottawa", "rome", "tokyo", "bangkok", "tehran"]
-  plot_words(wordVectors, set1p, set1n, 'set2.png')
-  
+  set1p = [word for word in set1p if word in wordVectors]
+  set1n = [word for word in set1n if word in wordVectors]
+  if len(set1p+set1n) > 0:
+    plot_words(wordVectors, set1p, set1n, 'set2.png')
+  else:
+    os.system('cp not-found.png set2.png')  
+ 
   set1p = ["prince", "son", "uncle", "boy", "brother", "dad", "father", "grandfather", "grandson", "groom"]
   set1p += ["he", "his", "husband", "king", "man", "nephew"]
   set1n = ["princess", "daughter", "aunt", "girl", "sister", "mom", "mother", "grandmother", "grandaughter", "bride"]
   set1n += ["she", "her", "wife", "queen", "woman", "niece"]
-  plot_words(wordVectors, set1p, set1n, 'set3.png')
-  
+  set1p = [word for word in set1p if word in wordVectors]
+  set1n = [word for word in set1n if word in wordVectors]
+  if len(set1p+set1n) > 0:
+    plot_words(wordVectors, set1p, set1n, 'set3.png')
+  else:
+    os.system('cp not-found.png set3.png')
